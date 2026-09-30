@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: musa-postgres
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: BDAuth
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - pgdata:/var/lib/postgresql
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d BDAuth"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: musa-redis
+
+    ports:
+      - "6379:6379"
+  
+  adminer:
+    container_name: adminer
+    image: adminer
+    restart: unless-stopped
+    depends_on: 
+      postgres:
+        condition: service_healthy
+
+    ports:
+       - "8080:8080"
+
+volumes:
+  pgdata:
